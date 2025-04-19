@@ -1,3 +1,11 @@
 h1 {
   color: red;
 }
+
+.form-container {
+  background-color: #fdf0e0;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  border: 1px solid #eee;
+}
