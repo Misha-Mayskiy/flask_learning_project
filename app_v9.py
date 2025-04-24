@@ -99,7 +99,6 @@ def carousel():
         'mars4.jpg',
         'mars5.jpg',
         'mars6.jpg'
-        # Добавьте сюда имена других файлов из static/img
     ]
     existing_images = []
     for filename in image_files:
