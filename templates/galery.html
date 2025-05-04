@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2 class="text-center mb-4">Пейзажи Марса</h2>
+
+    {% if images %}
+        <div id="marsCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                {% for i in range(images|length) %}
+                    <button type="button" data-bs-target="#marsCarousel" data-bs-slide-to="{{ i }}"
+                            class="{{ 'active' if i == 0 else '' }}" aria-current="{{ 'true' if i == 0 else 'false' }}"
+                            aria-label="Slide {{ i + 1 }}"></button>
+                {% endfor %}
+            </div>
+            <div class="carousel-inner">
+                {% for image_file in images %}
+                    <div class="carousel-item {{ 'active' if loop.first else '' }}">
+                        <img src="{{ url_for('static', filename='img/' + image_file) }}" class="d-block w-100"
+                             alt="Пейзаж {{ loop.index }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#marsCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#marsCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+          В галерее пока нет изображений.
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Добавить картинку</h5>
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="galeryFile" name="galery_file" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
