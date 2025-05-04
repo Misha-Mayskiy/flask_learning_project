@@ -23,3 +23,15 @@ h4 {
   margin-right: auto;
   display: block;
 }
+
+.mission-logo {
+    height: 40px;
+    width: auto;
+}
+
+.table {
+    margin-top: 20px;
+}
+.table td {
+    vertical-align: middle;
+}

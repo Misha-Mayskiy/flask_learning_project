@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <h2>Оформление каюты</h2>
+    <table class="table table-bordered text-center">
+        <thead>
+            <tr>
+                <th scope="col" class="table-secondary">Цвет стен</th>
+                <th scope="col" class="table-secondary">Эмблема</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="background-color: {{ wall_color }}; height: 200px;">
+                </td>
+                <td>
+                    {% if alien_image_filename %}
+                        <img src="{{ url_for('static', filename='img/' + alien_image_filename) }}"
+                             alt="Эмблема" class="img-fluid" style="max-height: 180px;">
+                    {% else %}
+                        <p>(Изображение не найдено)</p>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}
