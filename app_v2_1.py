@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, render_template, request
+from flask import Flask, url_for, render_template, request, redirect
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/img'
@@ -7,13 +7,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 @app.route('/')
-def mission_name():
-    return "Миссия Колонизация Марса"
+def root():
+    return redirect('/index/Заготовка')
 
 
-@app.route('/index')
-def mission_motto():
-    return "И на Марсе будут яблони цвести!"
+@app.route('/index/<title>')
+def index_with_title(title):
+    return render_template('base.html', title=title)
 
 
 @app.route('/promotion_image')
@@ -72,12 +72,10 @@ def load_photo():
         if 'photo_file' not in request.files:
             print('Нет файла в запросе')
             return render_template('load_photo.html', title='Отбор астронавтов', image_url=None)
-
         file = request.files['photo_file']
         if file.filename == '':
             print('Файл не выбран')
             return render_template('load_photo.html', title='Отбор астронавтов', image_url=None)
-
         if file:
             filename = 'uploaded_photo.jpg'
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -91,6 +89,26 @@ def load_photo():
                                        error="Ошибка сохранения файла")
 
     return render_template('load_photo.html', title='Отбор астронавтов', image_url=image_url)
+
+
+@app.route('/carousel')
+def carousel():
+    image_files = [
+        'mars1.jpg',
+        'mars2.jpg',
+        'mars3.jpg',
+        'mars4.jpg',
+        'mars5.jpg',
+        'mars6.jpg'
+    ]
+    existing_images = []
+    for filename in image_files:
+        if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+            existing_images.append(filename)
+        else:
+            print(f"Предупреждение: Файл {filename} не найден в {app.config['UPLOAD_FOLDER']}")
+
+    return render_template('carousel.html', title='Пейзажи Обои 4K без СМС и регистрации', images=existing_images)
 
 
 if __name__ == '__main__':
