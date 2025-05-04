@@ -2,6 +2,11 @@ h1 {
   color: red;
 }
 
+h4 {
+    color: #6c757d;
+    padding-left: 20px;
+}
+
 .form-container {
   background-color: #fdf0e0;
   padding: 20px;
