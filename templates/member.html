@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-3 text-center">
+
+    {% if member %}
+        <h2>{{ member.surname }} {{ member.name }}</h2>
+
+        <div class="my-3">
+            {% if member.photo_url %}
+                <img src="{{ url_for('static', filename='img/' + member.photo_url) }}"
+                     alt="Фото {{ member.name }} {{ member.surname }}" class="img-fluid rounded" style="max-height: 300px;">
+            {% else %}
+                <p>(Фотография отсутствует)</p>
+            {% endif %}
+        </div>
+
+        {% if member.specialties %}
+            <p>{{ member.specialties|sort|join(', ') }}</p>
+        {% else %}
+            <p>(Специальности не указаны)</p>
+        {% endif %}
+
+    {% else %}
+         <div class="alert alert-warning" role="alert">
+           Не удалось загрузить данные члена экипажа. Проверьте файл crew.json.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
