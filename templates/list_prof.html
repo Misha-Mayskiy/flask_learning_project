@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h2>Список профессий</h2>
+
+        {% if list_type == 'ol' %}
+            <ol>
+                {% for prof in professions %}
+                    <li>{{ prof }}</li>
+                {% endfor %}
+            </ol>
+        {% elif list_type == 'ul' %}
+            <ul>
+                {% for prof in professions %}
+                    <li>{{ prof }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+              Неверный параметр списка! Используйте 'ol' для нумерованного или 'ul' для маркированного списка.
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}
