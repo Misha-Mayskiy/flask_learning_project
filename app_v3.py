@@ -2,12 +2,19 @@ import glob
 import json
 import os
 import random
-
+from forms.login_form import LoginForm
+from models.users import User
+from database import db_session
 from flask import Flask, url_for, render_template, request, redirect
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = 'static/img'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 PROFESSIONS = [
     "инженер-исследователь", "пилот", "строитель", "экзобиолог", "врач",
@@ -29,6 +36,41 @@ def root():
 @app.route('/index/<title>')
 def index_with_title(title):
     return render_template('base.html', title=title)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db_session.create_session().query(User).get(user_id)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect("/")
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            print(f"Пользователь {user.email} успешно вошел.")
+            return redirect("/")
+        else:
+            print(f"Неудачная попытка входа для email: {form.email.data}")
+            return render_template('login.html',
+                                   message="Неправильный логин или пароль",
+                                   form=form,
+                                   title='Авторизация')
+    return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    print(f"Пользователь {current_user.email} выходит.")
+    logout_user()
+    return redirect("/")
 
 
 # Старые маршруты, из предыдущего урока
@@ -315,5 +357,7 @@ if __name__ == '__main__':
         with open(css_file, 'w') as f:
             pass
         print(f"Создан файл {css_file}")
+
+    db_session.global_init("database/mars_explorer.db")
 
     app.run(port=8080, host='127.0.0.1', debug=True)
