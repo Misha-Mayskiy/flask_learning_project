@@ -12,8 +12,19 @@
   <body>
     <header class="container mt-3">
         <div class="d-flex justify-content-between align-items-center">
-             <h1>Миссия Колонизация Марса</h1>
-             <span class="text-muted">Mars One</span>
+             <div>
+                 <h1>Миссия Колонизация Марса</h1>
+                 <span class="text-muted">Mars One</span>
+             </div>
+             <div>
+                {% if current_user.is_authenticated %}
+                    <span class="me-3">Привет, {{ current_user.name }}!</span>
+                    <a class="btn btn-secondary btn-sm" href="/logout">Выйти</a>
+                {% else %}
+                    <a class="btn btn-primary me-2" href="/register">Зарегистрироваться</a>
+                    <a class="btn btn-success" href="/login">Войти</a>
+                {% endif %}
+             </div>
         </div>
         <hr>
     </header>

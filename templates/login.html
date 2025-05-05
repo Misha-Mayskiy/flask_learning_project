@@ -1,31 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-3">
-    <div class="d-flex align-items-center mb-3">
-        <img src="{{ url_for('static', filename='img/mars_logo.png') }}" alt="Эмблема миссии" class="mission-logo me-2">
-        <h2>Аварийный доступ</h2>
-    </div>
+    <h1>Авторизация</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
 
-    <form method="post">
         <div class="mb-3">
-            <label for="astronaut_id" class="form-label">Id астронавта</label>
-            <input type="text" class="form-control" id="astronaut_id" name="astronaut_id">
-        </div>
-        <div class="mb-3">
-            <label for="astronaut_password" class="form-label">Пароль астронавта</label>
-            <input type="password" class="form-control" id="astronaut_password" name="astronaut_password">
-        </div>
-        <div class="mb-3">
-            <label for="captain_id" class="form-label">Id капитана</label>
-            <input type="text" class="form-control" id="captain_id" name="captain_id">
-        </div>
-        <div class="mb-3">
-            <label for="captain_password" class="form-label">Пароль капитана</label>
-            <input type="password" class="form-control" id="captain_password" name="captain_password">
+            {{ form.email.label(class="form-label") }}<br>
+            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), type="email") }}<br>
+            {% for error in form.email.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
         </div>
 
-        <button type="submit" class="btn btn-primary">Доступ</button>
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}<br>
+            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), type="password") }}<br>
+            {% for error in form.password.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3 form-check">
+            {{ form.remember_me(class="form-check-input") }}
+            {{ form.remember_me.label(class="form-check-label") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.submit(type="submit", class="btn btn-primary") }}
+        </div>
+
+        {% if message %}
+            <div class="alert alert-danger" role="alert">
+              {{ message }}
+            </div>
+        {% endif %}
     </form>
-</div>
 {% endblock %}

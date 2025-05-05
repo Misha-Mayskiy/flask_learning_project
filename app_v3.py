@@ -1,4 +1,8 @@
+import glob
+import json
 import os
+import random
+
 from flask import Flask, url_for, render_template, request, redirect
 
 app = Flask(__name__)
@@ -12,6 +16,10 @@ PROFESSIONS = [
     "оператор марсохода", "киберинженер", "штурман", "пилот дронов"
 ]
 
+ASTRONAUTS = [
+    "Ридли Скотт", "Энди Уир", "Марк Уотни", "Венката Капур", "Тедди Сандерс", "Шон Бин"
+]
+
 
 @app.route('/')
 def root():
@@ -22,6 +30,8 @@ def root():
 def index_with_title(title):
     return render_template('base.html', title=title)
 
+
+# Старые маршруты, из предыдущего урока
 
 @app.route('/training/<prof>')
 def training(prof):
@@ -76,7 +86,124 @@ def show_answer():
     return render_template('auto_answer.html', **user_data)
 
 
-# Старые маршруты, из предыдущего урока
+@app.route('/distribution')
+def distribution():
+    return render_template(
+        'distribution.html',
+        title='Размещение',
+        astronauts=ASTRONAUTS
+    )
+
+
+@app.route('/table_param/<sex>/<int:age>')
+def table_param(sex, age):
+    sex_lower = sex.lower()
+
+    if sex_lower == 'female':
+        if age < 21:
+            wall_color = '#ff9966'
+            alien_image = 'alien_female.jpg'
+        else:
+            wall_color = '#ff6633'
+            alien_image = 'alien_male.jpg'
+    elif sex_lower == 'male':
+        if age < 21:
+            wall_color = '#99ccff'
+            alien_image = 'alien_male.jpg'
+        else:
+            wall_color = '#3399ff'
+            alien_image = 'alien_female.jpg'
+    else:
+        wall_color = '#cccccc'
+        alien_image = None
+
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], alien_image)
+    if not os.path.exists(image_path):
+        print(f"Предупреждение: Файл изображения '{alien_image}' не найден.")
+        alien_image = None
+
+    return render_template(
+        'table_param.html',
+        title='Оформление каюты',
+        wall_color=wall_color,
+        alien_image_filename=alien_image
+    )
+
+
+@app.route('/galery', methods=['POST', 'GET'])
+def galery():
+    if request.method == 'POST':
+        if 'galery_file' not in request.files:
+            print('Нет файла в запросе')
+            return redirect(request.url)
+
+        file = request.files['galery_file']
+        if file.filename == '':
+            print('Файл не выбран')
+            return redirect(request.url)
+
+        if file:
+            existing_files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], 'galery_*.jpg')) \
+                             + glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], 'galery_*.png')) \
+                             + glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], 'galery_*.jpeg'))
+
+            new_index = len(existing_files) + 1
+            ext = os.path.splitext(file.filename)[1].lower()
+
+            filename = f"galery_{new_index}{ext}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                file.save(filepath)
+                print(f'Файл сохранен как {filepath}')
+            except Exception as e:
+                print(f"Ошибка при сохранении файла: {e}")
+            return redirect(url_for('galery'))
+
+    image_files = []
+    patterns = ['*.jpg', '*.png', '*.jpeg', '*.gif']
+    for pattern in patterns:
+        full_paths = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], pattern))
+        image_files.extend([os.path.basename(f) for f in full_paths])
+    gallery_images = sorted(image_files)
+
+    print(f"Найдены изображения для галереи: {gallery_images}")
+
+    return render_template('galery.html', title='Красная планета', images=gallery_images)
+
+
+@app.route('/member')
+def show_random_member():
+    try:
+        json_file_path = os.path.join('templates', 'crew.json')
+        with open(json_file_path, 'r', encoding='utf-8') as f:
+            crew_data = json.load(f)
+
+        if not crew_data:
+            print("Ошибка: Список экипажа в crew.json пуст.")
+            selected_member = None
+        else:
+            selected_member = random.choice(crew_data)
+            if 'specialties' in selected_member and isinstance(selected_member['specialties'], list):
+                selected_member['specialties'] = sorted(selected_member['specialties'])
+            else:
+                selected_member['specialties'] = []
+
+    except FileNotFoundError:
+        print("Ошибка: Файл 'templates/crew.json' не найден.")
+        selected_member = None
+    except json.JSONDecodeError:
+        print("Ошибка: Не удалось декодировать JSON из файла 'templates/crew.json'.")
+        selected_member = None
+    except Exception as e:
+        print(f"Непредвиденная ошибка при обработке данных экипажа: {e}")
+        selected_member = None
+
+    return render_template(
+        'member.html',
+        title='Случайный член экипажа',
+        member=selected_member
+    )
+
 
 @app.route('/promotion_image')
 def promotion_image():
@@ -177,4 +304,16 @@ if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
         print(f"Создана папка {UPLOAD_FOLDER}")
+
+    css_folder = os.path.join('static', 'css')
+    if not os.path.exists(css_folder):
+        os.makedirs(css_folder)
+        print(f"Создана папка {css_folder}")
+
+    css_file = os.path.join(css_folder, 'style.css')
+    if not os.path.exists(css_file):
+        with open(css_file, 'w') as f:
+            pass
+        print(f"Создан файл {css_file}")
+
     app.run(port=8080, host='127.0.0.1', debug=True)
