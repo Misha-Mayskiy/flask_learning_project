@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Works log</h1>
+
+    {% if current_user.is_authenticated %}
+      <div class="mb-3">
+          <a href="{{ url_for('add_job') }}" class="btn btn-secondary">Добавить работу</a>
+      </div>
+    {% endif %}
+
+    {% for job in jobs %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                 <h5 class="mb-0">Action # {{ loop.index }}</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th scope="col">Title of activity</th>
+                            <th scope="col">Team leader</th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">List of collaborators</th>
+                            <th scope="col">Is finished</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ job.job }}</td>
+                            <td>{{ job.leader.name }} {{ job.leader.surname }}</td>
+                            <td>{{ job.work_size }} hours</td>
+                            <td>{{ job.collaborators }}</td>
+                            <td>
+                                {% if job.is_finished %}
+                                    Is finished
+                                {% else %}
+                                    <span style="background-color: #f8d7da; padding: 0.1rem 0.3rem; border-radius: 0.2rem;">
+                                        Is not finished
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <p>Пока нет ни одной работы.</p>
+    {% endfor %}
+
+{% endblock %}

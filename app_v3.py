@@ -31,9 +31,11 @@ ASTRONAUTS = [
 ]
 
 
-@app.route('/')
-def root():
-    return redirect('/index/MarsOne')
+@app.route("/")
+def works_log():
+    db_sess = db_session.create_session()
+    jobs = db_sess.query(Jobs).all()
+    return render_template("works_log.html", jobs=jobs, title="Works log")
 
 
 @app.route('/index/<title>')
