@@ -4,7 +4,9 @@ import os
 import random
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
+from forms.job_form import JobForm
 from models.users import User
+from models.jobs import Jobs
 from database import db_session
 from flask import Flask, url_for, render_template, request, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -31,7 +33,7 @@ ASTRONAUTS = [
 
 @app.route('/')
 def root():
-    return redirect('/index/Заготовка')
+    return redirect('/index/MarsOne')
 
 
 @app.route('/index/<title>')
@@ -102,6 +104,26 @@ def logout():
     print(f"Пользователь {current_user.email} выходит.")
     logout_user()
     return redirect("/")
+
+
+@app.route('/addjob', methods=['GET', 'POST'])
+@login_required
+def add_job():
+    form = JobForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = Jobs()
+        job.job = form.job.data
+        job.work_size = form.work_size.data
+        job.collaborators = form.collaborators.data
+        job.is_finished = form.is_finished.data
+        job.team_leader = current_user.id
+        db_sess.add(job)
+        db_sess.commit()
+        print(f"Добавлена новая работа: '{job.job}' от пользователя ID {current_user.id}")
+        return redirect('/')
+
+    return render_template('add_job.html', title='Добавление работы', form=form)
 
 
 # Старые маршруты, из предыдущего урока
