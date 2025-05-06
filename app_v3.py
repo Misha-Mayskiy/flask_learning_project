@@ -2,9 +2,12 @@ import glob
 import json
 import os
 import random
+from sqlalchemy import orm
+from forms.department_form import DepartmentForm
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
 from forms.job_form import JobForm
+from models.departments import Department
 from models.users import User
 from models.jobs import Jobs
 from database import db_session
@@ -106,6 +109,105 @@ def logout():
     print(f"Пользователь {current_user.email} выходит.")
     logout_user()
     return redirect("/")
+
+
+@app.route('/departments')
+def departments_list():
+    """Отображение списка департаментов"""
+    db_sess = db_session.create_session()
+    departments = db_sess.query(Department).options(orm.joinedload(Department.chief_user)).all()
+    return render_template("departments_list.html",
+                           departments=departments,
+                           title="List of Departments")
+
+
+@app.route('/add_department', methods=['GET', 'POST'])
+@login_required
+def add_department():
+    """Обработчик добавления департамента"""
+    form = DepartmentForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+
+        if not db_sess.query(User).get(form.chief.data):
+            return render_template('add_department.html', title='Adding Department',
+                                   form=form, message="Руководитель с таким ID не найден")
+        if db_sess.query(Department).filter(Department.email == form.email.data).first():
+            return render_template('add_department.html', title='Adding Department',
+                                   form=form, message="Департамент с таким email уже существует")
+
+        department = Department(
+            title=form.title.data,
+            chief=form.chief.data,
+            members=form.members.data,
+            email=form.email.data
+        )
+        db_sess.add(department)
+        db_sess.commit()
+        print(f"Добавлен новый департамент: '{department.title}'")
+        return redirect('/departments')
+    return render_template('add_department.html', title='Adding Department', form=form)
+
+
+@app.route('/edit_department/<int:dept_id>', methods=['GET', 'POST'])
+@login_required
+def edit_department(dept_id):
+    """Обработчик редактирования департамента"""
+    form = DepartmentForm()
+    db_sess = db_session.create_session()
+
+    department = db_sess.query(Department).filter(Department.id == dept_id).first()
+
+    if not department:
+        abort(404)
+
+    if not (current_user.id == department.chief or current_user.id == 1):
+        print(f"Попытка редактирования департамента {dept_id} пользователем {current_user.id} без прав.")
+        abort(403)  # Запрещено
+
+    if request.method == "GET":
+        form.title.data = department.title
+        form.chief.data = department.chief
+        form.members.data = department.members
+        form.email.data = department.email
+    elif form.validate_on_submit():
+        if department.chief != form.chief.data and not db_sess.query(User).get(form.chief.data):
+            return render_template('add_department.html', title='Editing Department',
+                                   form=form, message="Руководитель с таким ID не найден")
+        existing_dept_with_email = db_sess.query(Department).filter(Department.email == form.email.data,
+                                                                    Department.id != dept_id).first()
+        if existing_dept_with_email:
+            return render_template('add_department.html', title='Editing Department',
+                                   form=form, message="Департамент с таким email уже существует")
+
+        department.title = form.title.data
+        department.chief = form.chief.data
+        department.members = form.members.data
+        department.email = form.email.data
+        db_sess.commit()
+        print(f"Департамент {dept_id} успешно отредактирован пользователем {current_user.id}")
+        return redirect('/departments')
+
+    return render_template('add_department.html', title='Editing Department', form=form)
+
+
+@app.route('/delete_department/<int:dept_id>', methods=['GET', 'POST'])
+@login_required
+def delete_department(dept_id):
+    """Обработчик удаления департамента"""
+    db_sess = db_session.create_session()
+    department = db_sess.query(Department).filter(Department.id == dept_id).first()
+    if not department:
+        abort(404)
+    if current_user.id == department.chief or current_user.id == 1:
+        db_sess.delete(department)
+        db_sess.commit()
+        print(f"Департамент {dept_id} успешно удален пользователем {current_user.id}")
+    else:
+        print(f"Попытка удаления департамента {dept_id} пользователем {current_user.id} без прав.")
+        abort(403)
+
+    return redirect('/departments')
 
 
 @app.route('/addjob', methods=['GET', 'POST'])
