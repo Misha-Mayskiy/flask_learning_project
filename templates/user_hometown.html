@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>Nostalgy</h2>
+        <h3>{{ user.name }} {{ user.surname }}</h3>
+        <h4>Hometown {{ user.city_from }}</h4>
+
+        {% if user.city_from %}
+            <div id="map" style="width: 80%; height: 450px; margin: 20px auto;"></div>
+        {% else %}
+            <p>У этого колониста не указан родной город.</p>
+        {% endif %}
+    </div>
+
+    Your api key change!!!
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=8013b162-6b42-4997-9691-77b7074026e0&lang=ru_RU"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+        ymaps.ready(init);
+
+        function init(){
+            var hometown = "{{ user.city_from }}";
+
+            if (hometown) {
+                var myMap = new ymaps.Map("map", {
+                    center: [55.76, 37.64], // Москва по умолчанию
+                    zoom: 10,
+                    controls: ['zoomControl', 'fullscreenControl']
+                });
+
+                ymaps.geocode(hometown, {
+                    results: 1
+                }).then(function (res) {
+                    var firstGeoObject = res.geoObjects.get(0);
+                    if (firstGeoObject) {
+                        var coords = firstGeoObject.geometry.getCoordinates();
+                        myMap.setCenter(coords);
+                        myMap.geoObjects.add(new ymaps.Placemark(coords, {
+                            balloonContentHeader: hometown,
+                            iconCaption: hometown
+                        }, {
+                            preset: 'islands#greenDotIconWithCaption'
+                        }));
+                    } else {
+                        console.error("Город '" + hometown + "' не найден геокодером Яндекса.");
+                        document.getElementById("map").innerHTML = "<p>К сожалению, город '" + hometown + "' не найден на карте.</p>";
+                    }
+                }, function (err) {
+                    console.error("Ошибка геокодирования: ", err);
+                    document.getElementById("map").innerHTML = "<p>Произошла ошибка при попытке найти город на карте.</p>";
+                });
+            }
+        }
+    </script>
+{% endblock %}

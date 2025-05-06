@@ -2,6 +2,8 @@ import glob
 import json
 import os
 import random
+
+import requests
 from sqlalchemy import orm
 from api import jobs_api
 from api import users_api
@@ -126,6 +128,42 @@ def departments_list():
     return render_template("departments_list.html",
                            departments=departments,
                            title="List of Departments")
+
+
+@app.route('/users_show/<int:user_id>')
+def show_user_hometown(user_id):
+    api_url = f'http://127.0.0.1:8080/api/users/{user_id}'
+
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
+
+        user_data = response.json()
+        if 'user' not in user_data:
+            print(f"API не вернул ключ 'user' для user_id {user_id}")
+            abort(404)
+
+        user_info = user_data['user']
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred while calling API for user {user_id}: {http_err}")
+        if response.status_code == 404:
+            abort(404)
+        else:
+            abort(500)
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred while calling API for user {user_id}: {req_err}")
+        abort(500)
+    except ValueError:
+        print(f"Failed to decode JSON from API for user {user_id}")
+        abort(500)
+
+    if not user_info.get("city_from"):
+        print(f"У пользователя {user_id} не указан город.")
+
+    page_title = f"Hometown: {user_info.get('name', '')} {user_info.get('surname', '')}"
+
+    return render_template('user_hometown.html', user=user_info, title=page_title)
 
 
 @app.route('/add_department', methods=['GET', 'POST'])

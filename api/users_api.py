@@ -24,6 +24,7 @@ def user_to_dict(user_object):
         'speciality': user_object.speciality,
         'address': user_object.address,
         'email': user_object.email,
+        'city_from': user_object.city_from,
         'modified_date': user_object.modified_date.isoformat() if user_object.modified_date else None
     }
 
@@ -74,7 +75,8 @@ def create_user():
         position=request.json.get('position'),
         speciality=request.json.get('speciality'),
         address=request.json.get('address'),
-        email=request.json['email']
+        email=request.json['email'],
+        city_from = request.json.get('city_from')
     )
     new_user.set_password(request.json['password'])
 
@@ -105,6 +107,7 @@ def edit_user(user_id):
     user_to_edit.position = request.json.get('position', user_to_edit.position)
     user_to_edit.speciality = request.json.get('speciality', user_to_edit.speciality)
     user_to_edit.address = request.json.get('address', user_to_edit.address)
+    user_to_edit.city_from = request.json.get('city_from', user_to_edit.city_from)
 
     new_email = request.json.get('email')
     if new_email and new_email != user_to_edit.email:
