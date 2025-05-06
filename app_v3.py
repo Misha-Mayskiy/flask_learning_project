@@ -4,6 +4,7 @@ import os
 import random
 from sqlalchemy import orm
 from api import jobs_api
+from api import users_api
 from forms.department_form import DepartmentForm
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
@@ -17,10 +18,13 @@ from flask import Flask, url_for, render_template, request, redirect, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = 'static/img'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 app.register_blueprint(jobs_api.blueprint)
+app.register_blueprint(users_api.blueprint)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
