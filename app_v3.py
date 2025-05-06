@@ -7,6 +7,7 @@ import requests
 from sqlalchemy import orm
 from api import jobs_api
 from api import users_api
+from api import users_resource
 from forms.department_form import DepartmentForm
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
@@ -16,10 +17,12 @@ from models.users import User
 from models.jobs import Jobs
 from models.category import Category
 from database import db_session
+from flask_restful import Api
 from flask import Flask, url_for, render_template, request, redirect, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+api = Api(app)
 
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = 'static/img'
@@ -27,6 +30,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.register_blueprint(jobs_api.blueprint)
 app.register_blueprint(users_api.blueprint)
+
+api.add_resource(users_resource.UsersListResource, '/api/v2/users')
+api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)

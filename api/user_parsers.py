@@ -1,0 +1,23 @@
+from flask_restful import reqparse
+
+user_parser = reqparse.RequestParser()
+user_parser.add_argument('name', type=str, required=True, help="Name cannot be blank!")
+user_parser.add_argument('surname', type=str, required=False)
+user_parser.add_argument('age', type=int, required=False)
+user_parser.add_argument('position', type=str, required=False)
+user_parser.add_argument('speciality', type=str, required=False)
+user_parser.add_argument('address', type=str, required=False)
+user_parser.add_argument('city_from', type=str, required=False)
+user_parser.add_argument('email', type=str, required=True, help="Email cannot be blank!")
+user_parser.add_argument('password', type=str, required=True, help="Password cannot be blank for new user")
+
+user_put_parser = reqparse.RequestParser()
+user_put_parser.add_argument('name', type=str)
+user_put_parser.add_argument('surname', type=str)
+user_put_parser.add_argument('age', type=int)
+user_put_parser.add_argument('position', type=str)
+user_put_parser.add_argument('speciality', type=str)
+user_put_parser.add_argument('address', type=str)
+user_put_parser.add_argument('city_from', type=str)
+user_put_parser.add_argument('email', type=str)
+user_put_parser.add_argument('password', type=str)
