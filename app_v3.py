@@ -8,6 +8,7 @@ from sqlalchemy import orm
 from api import jobs_api
 from api import users_api
 from api import users_resource
+from api import jobs_resource
 from forms.department_form import DepartmentForm
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
@@ -33,6 +34,8 @@ app.register_blueprint(users_api.blueprint)
 
 api.add_resource(users_resource.UsersListResource, '/api/v2/users')
 api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
+api.add_resource(jobs_resource.JobsListResource, '/api/v2/jobs')
+api.add_resource(jobs_resource.JobsResource, '/api/v2/jobs/<int:job_id>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
