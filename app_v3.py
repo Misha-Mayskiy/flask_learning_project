@@ -3,6 +3,7 @@ import json
 import os
 import random
 from sqlalchemy import orm
+from api import jobs_api
 from forms.department_form import DepartmentForm
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
@@ -19,6 +20,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = 'static/img'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.register_blueprint(jobs_api.blueprint)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
