@@ -94,14 +94,20 @@ def register():
             return render_template('register.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
+
         db_sess = db_session.create_session()
+
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
+
         user = User(
             name=form.name.data,
             email=form.email.data,
+            surname=form.surname.data if form.surname.data else None,
+            age=int(form.age.data) if form.age.data else None,
+            city_from=form.city_from.data if form.city_from.data else None
         )
         user.set_password(form.password.data)
         db_sess.add(user)

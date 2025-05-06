@@ -46,6 +46,36 @@
         </div>
 
         <div class="mb-3">
+            {{ form.surname.label(class="form-label") }}<br>
+            {{ form.surname(class="form-control" + (" is-invalid" if form.surname.errors else "")) }}<br>
+            {% for error in form.surname.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.age.label(class="form-label") }}<br>
+            {{ form.age(class="form-control" + (" is-invalid" if form.age.errors else ""), type="number" if form.age.type == 'IntegerField' else "text") }}<br>
+            {% for error in form.age.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.city_from.label(class="form-label") }}<br>
+            {{ form.city_from(class="form-control" + (" is-invalid" if form.city_from.errors else "")) }}<br>
+            {% for error in form.city_from.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
             {{ form.submit(type="submit", class="btn btn-primary") }}
         </div>
 
