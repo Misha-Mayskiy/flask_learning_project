@@ -5,7 +5,7 @@
 
     {% if current_user.is_authenticated %}
       <div class="mb-3">
-          <a href="{{ url_for('add_job') }}" class="btn btn-secondary">Добавить работу</a>
+          <a href="{{ url_for('add_job') }}" class="btn btn-dark">Add job</a>
       </div>
     {% endif %}
 
@@ -33,9 +33,11 @@
                             <td>{{ job.collaborators }}</td>
                             <td>
                                 {% if job.is_finished %}
-                                    Is finished
+                                    <span style="background-color: #d1e7dd; padding: 0.1rem 0.3rem; border-radius: 0.2rem; color: #0f5132;">
+                                        Finished
+                                    </span>
                                 {% else %}
-                                    <span style="background-color: #f8d7da; padding: 0.1rem 0.3rem; border-radius: 0.2rem;">
+                                    <span style="background-color: #f8d7da; padding: 0.1rem 0.3rem; border-radius: 0.2rem; color: #842029;">
                                         Is not finished
                                     </span>
                                 {% endif %}
@@ -44,9 +46,23 @@
                     </tbody>
                 </table>
             </div>
+
+            {% if current_user.is_authenticated and (current_user.id == job.team_leader or current_user.id == 1) %}
+                <div class="card-footer bg-white py-2">
+                    <a href="{{ url_for('edit_job', job_id=job.id) }}" class="btn btn-warning btn-sm me-2">
+                        Edit Job
+                    </a>
+                    <a href="{{ url_for('delete_job', job_id=job.id) }}"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to delete this job?');">
+                        Delete job
+                    </a>
+                </div>
+            {% endif %}
+
         </div>
     {% else %}
-        <p>Пока нет ни одной работы.</p>
+        <p>There are no jobs yet.</p>
     {% endfor %}
 
 {% endblock %}

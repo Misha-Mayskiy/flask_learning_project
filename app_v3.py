@@ -8,7 +8,7 @@ from forms.job_form import JobForm
 from models.users import User
 from models.jobs import Jobs
 from database import db_session
-from flask import Flask, url_for, render_template, request, redirect
+from flask import Flask, url_for, render_template, request, redirect, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
@@ -126,6 +126,70 @@ def add_job():
         return redirect('/')
 
     return render_template('add_job.html', title='Добавление работы', form=form)
+
+
+@app.route('/editjob/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    form = JobForm()
+
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        job = db_sess.query(Jobs).filter(Jobs.id == job_id).first()
+
+        if job:
+            if current_user.id == job.team_leader or current_user.id == 1:
+                form.job.data = job.job
+                form.work_size.data = job.work_size
+                form.collaborators.data = job.collaborators
+                form.is_finished.data = job.is_finished
+            else:
+                print(f"Попытка редактирования работы {job_id} пользователем {current_user.id} без прав.")
+                abort(403)
+        else:
+            abort(404)
+
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = db_sess.query(Jobs).filter(Jobs.id == job_id).first()
+
+        if job:
+            if current_user.id == job.team_leader or current_user.id == 1:
+                job.job = form.job.data
+                job.work_size = form.work_size.data
+                job.collaborators = form.collaborators.data
+                job.is_finished = form.is_finished.data
+                db_sess.commit()
+                print(f"Работа {job_id} успешно отредактирована пользователем {current_user.id}")
+                return redirect('/')
+            else:
+                print(f"Попытка POST-редактирования работы {job_id} пользователем {current_user.id} без прав.")
+                abort(403)
+        else:
+            abort(404)
+
+    return render_template('add_job.html', title='Редактирование работы', form=form)
+
+
+@app.route('/deletejob/<int:job_id>',
+           methods=['GET', 'POST'])
+@login_required
+def delete_job(job_id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).filter(Jobs.id == job_id).first()
+
+    if job:
+        if current_user.id == job.team_leader or current_user.id == 1:
+            db_sess.delete(job)
+            db_sess.commit()
+            print(f"Работа {job_id} успешно удалена пользователем {current_user.id}")
+        else:
+            print(f"Попытка удаления работы {job_id} пользователем {current_user.id} без прав.")
+            abort(403)
+    else:
+        abort(404)
+
+    return redirect('/')
 
 
 # Старые маршруты, из предыдущего урока
