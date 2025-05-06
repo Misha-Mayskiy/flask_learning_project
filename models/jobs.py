@@ -2,6 +2,7 @@ import datetime
 import sqlalchemy
 from sqlalchemy import orm
 from database.db_session import SqlAlchemyBase
+from .category import association_table
 
 
 class Jobs(SqlAlchemyBase):
@@ -14,7 +15,14 @@ class Jobs(SqlAlchemyBase):
     start_date = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True, default=datetime.datetime.now)
     end_date = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+
     leader = orm.relationship('User')
+
+    categories = orm.relationship(
+        "Category",
+        secondary=association_table,
+        backref="jobs"
+    )
 
     def __repr__(self):
         return f'<Job> {self.job}'

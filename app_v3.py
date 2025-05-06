@@ -10,6 +10,7 @@ from forms.job_form import JobForm
 from models.departments import Department
 from models.users import User
 from models.jobs import Jobs
+from models.category import Category
 from database import db_session
 from flask import Flask, url_for, render_template, request, redirect, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -222,9 +223,26 @@ def add_job():
         job.collaborators = form.collaborators.data
         job.is_finished = form.is_finished.data
         job.team_leader = current_user.id
+
+        job.categories.clear()
+        category_ids_str = form.category_ids.data.split(',')
+        for cat_id_str in category_ids_str:
+            try:
+                cat_id = int(cat_id_str.strip())
+                category = db_sess.query(Category).get(cat_id)
+                if category:
+                    job.categories.append(category)
+                else:
+                    print(f"Предупреждение: Категория с ID {cat_id} не найдена.")
+            except ValueError:
+                if cat_id_str.strip():
+                    print(f"Предупреждение: Неверный ID категории '{cat_id_str.strip()}'.")
+
         db_sess.add(job)
         db_sess.commit()
-        print(f"Добавлена новая работа: '{job.job}' от пользователя ID {current_user.id}")
+        print(
+            f"Добавлена новая работа: '{job.job}' от пользователя ID "
+            f"{current_user.id} с категориями ID: {form.category_ids.data}")
         return redirect('/')
 
     return render_template('add_job.html', title='Добавление работы', form=form)
@@ -234,41 +252,51 @@ def add_job():
 @login_required
 def edit_job(job_id):
     form = JobForm()
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).filter(Jobs.id == job_id).options(
+        orm.subqueryload(Jobs.categories)).first()
+
+    if not job:
+        abort(404)
+
+    if not (current_user.id == job.team_leader or current_user.id == 1):
+        print(f"Попытка редактирования работы {job_id} пользователем {current_user.id} без прав.")
+        abort(403)
 
     if request.method == "GET":
-        db_sess = db_session.create_session()
-        job = db_sess.query(Jobs).filter(Jobs.id == job_id).first()
+        form.job.data = job.job
+        form.work_size.data = job.work_size
+        form.collaborators.data = job.collaborators
+        form.is_finished.data = job.is_finished
+        form.category_ids.data = ", ".join(str(cat.id) for cat in job.categories)
 
-        if job:
-            if current_user.id == job.team_leader or current_user.id == 1:
-                form.job.data = job.job
-                form.work_size.data = job.work_size
-                form.collaborators.data = job.collaborators
-                form.is_finished.data = job.is_finished
-            else:
-                print(f"Попытка редактирования работы {job_id} пользователем {current_user.id} без прав.")
-                abort(403)
-        else:
-            abort(404)
+    elif form.validate_on_submit():
+        job.job = form.job.data
+        job.work_size = form.work_size.data
+        job.collaborators = form.collaborators.data
+        job.is_finished = form.is_finished.data
 
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        job = db_sess.query(Jobs).filter(Jobs.id == job_id).first()
+        job.categories.clear()
+        category_ids_str = form.category_ids.data.split(',')
+        for cat_id_str in category_ids_str:
+            try:
+                cat_id = int(cat_id_str.strip())
+                category = db_sess.query(Category).get(cat_id)
+                if category:
+                    if category not in job.categories:
+                        job.categories.append(category)
+                else:
+                    print(f"Предупреждение: Категория с ID {cat_id} не найдена при редактировании.")
+            except ValueError:
+                if cat_id_str.strip():
+                    print(f"Предупреждение: Неверный ID категории "
+                          f"'{cat_id_str.strip()}' при редактировании.")
 
-        if job:
-            if current_user.id == job.team_leader or current_user.id == 1:
-                job.job = form.job.data
-                job.work_size = form.work_size.data
-                job.collaborators = form.collaborators.data
-                job.is_finished = form.is_finished.data
-                db_sess.commit()
-                print(f"Работа {job_id} успешно отредактирована пользователем {current_user.id}")
-                return redirect('/')
-            else:
-                print(f"Попытка POST-редактирования работы {job_id} пользователем {current_user.id} без прав.")
-                abort(403)
-        else:
-            abort(404)
+        db_sess.commit()
+        print(
+            f"Работа {job_id} успешно отредактирована пользователем "
+            f"{current_user.id} с категориями ID: {form.category_ids.data}")
+        return redirect('/')
 
     return render_template('add_job.html', title='Редактирование работы', form=form)
 

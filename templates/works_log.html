@@ -23,6 +23,7 @@
                 <th scope="col">Team leader</th>
                 <th scope="col">Duration</th>
                 <th scope="col">List of collaborators</th>
+                <th scope="col">Hazard category</th>
                 <th scope="col">Is finished</th>
             </tr>
             </thead>
@@ -33,14 +34,17 @@
                 <td>{{ job.work_size }} hours</td>
                 <td>{{ job.collaborators }}</td>
                 <td>
+                    {{ job.categories | map(attribute='name') | join(', ') or '-' }}
+                </td>
+                <td>
                     {% if job.is_finished %}
                     <span style="background-color: #d1e7dd; padding: 0.1rem 0.3rem; border-radius: 0.2rem; color: #0f5132;">
-                                        Finished
-                                    </span>
+                        Finished
+                    </span>
                     {% else %}
                     <span style="background-color: #f8d7da; padding: 0.1rem 0.3rem; border-radius: 0.2rem; color: #842029;">
-                                        Is not finished
-                                    </span>
+                        Is not finished
+                    </span>
                     {% endif %}
                 </td>
             </tr>

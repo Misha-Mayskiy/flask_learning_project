@@ -1,59 +1,69 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ title|default('Добавление работы') }}</h1>
+<h1>{{ title|default('Добавление работы') }}</h1>
 
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
 
-        <div class="mb-3">
-            {{ form.job.label(class="form-label") }}<br>
-            {{ form.job(class="form-control" + (" is-invalid" if form.job.errors else "")) }}<br>
-            {% for error in form.job.errors %}
-                <div class="invalid-feedback">
-                    {{ error }}
-                </div>
-            {% endfor %}
+    <div class="mb-3">
+        {{ form.job.label(class="form-label") }}<br>
+        {{ form.job(class="form-control" + (" is-invalid" if form.job.errors else "")) }}<br>
+        {% for error in form.job.errors %}
+        <div class="invalid-feedback">
+            {{ error }}
         </div>
+        {% endfor %}
+    </div>
 
-        <div class="mb-3">
-            {{ form.work_size.label(class="form-label") }}<br>
-            {{ form.work_size(class="form-control" + (" is-invalid" if form.work_size.errors else ""), type="number") }}<br>
-            {% for error in form.work_size.errors %}
-                <div class="invalid-feedback">
-                    {{ error }}
-                </div>
-            {% endfor %}
+    <div class="mb-3">
+        {{ form.work_size.label(class="form-label") }}<br>
+        {{ form.work_size(class="form-control" + (" is-invalid" if form.work_size.errors else ""), type="number") }}<br>
+        {% for error in form.work_size.errors %}
+        <div class="invalid-feedback">
+            {{ error }}
         </div>
+        {% endfor %}
+    </div>
 
-        <div class="mb-3">
-            {{ form.collaborators.label(class="form-label") }}<br>
-            {{ form.collaborators(class="form-control" + (" is-invalid" if form.collaborators.errors else "")) }}<br>
-            {% for error in form.collaborators.errors %}
-                <div class="invalid-feedback">
-                    {{ error }}
-                </div>
-            {% endfor %}
+    <div class="mb-3">
+        {{ form.collaborators.label(class="form-label") }}<br>
+        {{ form.collaborators(class="form-control" + (" is-invalid" if form.collaborators.errors else "")) }}<br>
+        {% for error in form.collaborators.errors %}
+        <div class="invalid-feedback">
+            {{ error }}
         </div>
+        {% endfor %}
+    </div>
 
-        <div class="mb-3 form-check">
-            {{ form.is_finished(class="form-check-input" + (" is-invalid" if form.is_finished.errors else "")) }}
-            {{ form.is_finished.label(class="form-check-label") }}
-            {% for error in form.is_finished.errors %}
-                <div class="invalid-feedback d-block">
-                    {{ error }}
-                </div>
-            {% endfor %}
+    <div class="mb-3">
+        {{ form.category_ids.label(class="form-label") }}<br>
+        {{ form.category_ids(class="form-control" + (" is-invalid" if form.category_ids.errors else "")) }}<br>
+        {% for error in form.category_ids.errors %}
+        <div class="invalid-feedback">
+            {{ error }}
         </div>
+        {% endfor %}
+    </div>
 
-        <div class="mb-3">
-            {{ form.submit(type="submit", class="btn btn-primary") }}
+    <div class="mb-3 form-check">
+        {{ form.is_finished(class="form-check-input" + (" is-invalid" if form.is_finished.errors else "")) }}
+        {{ form.is_finished.label(class="form-check-label") }}
+        {% for error in form.is_finished.errors %}
+        <div class="invalid-feedback d-block">
+            {{ error }}
         </div>
+        {% endfor %}
+    </div>
 
-        {% if message %}
-            <div class="alert alert-danger" role="alert">
-              {{ message }}
-            </div>
-        {% endif %}
-    </form>
+    <div class="mb-3">
+        {{ form.submit(type="submit", class="btn btn-primary") }}
+    </div>
+
+    {% if message %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
+</form>
 {% endblock %}
